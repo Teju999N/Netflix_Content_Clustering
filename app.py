@@ -8,7 +8,7 @@ tfidf = pickle.load(open("tfidf.pkl", "rb"))
 st.title("Netflix Content Clustering")
 
 user_input = st.text_input("Enter movie description")
-client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+client = groq(api_key=st.secrets["GROQ_API_KEY"])
 
 def explain(text):
     response = client.chat.completions.create(
