@@ -1,5 +1,6 @@
 import streamlit as st
 import pickle
+from groq import Groq
 
 # Load model
 model = pickle.load(open("kmeans.pkl", "rb"))
@@ -8,7 +9,7 @@ tfidf = pickle.load(open("tfidf.pkl", "rb"))
 st.title("Netflix Content Clustering")
 
 user_input = st.text_input("Enter movie description")
-client = groq(api_key=st.secrets["GROQ_API_KEY"])
+client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 
 def explain(text):
     response = client.chat.completions.create(
