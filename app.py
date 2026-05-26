@@ -2,8 +2,8 @@ import streamlit as st
 import pickle
 
 # Load model
-kmeans = pickle.load(open("model/kmeans.pkl", "rb"))
-tfidf = pickle.load(open("model/tfidf.pkl", "rb"))
+kmeans = pickle.load(open("kmeans.pkl", "rb"))
+tfidf = pickle.load(open("tfidf.pkl", "rb"))
 
 st.title("Netflix Content Clustering")
 
