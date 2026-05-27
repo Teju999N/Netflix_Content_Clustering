@@ -17,16 +17,11 @@ st.title("🎬 Netflix Content Clustering & Recommendation")
 user_input = st.text_input("Enter detailed movie/show description")
 
 if user_input:
-
-    # -----------------------------
     # Handle weak input
-    # -----------------------------
     if len(user_input.split()) < 3:
         st.warning("Please enter a more detailed description")
 
-    # -----------------------------
     # Transform input
-    # -----------------------------
     vec = tfidf.transform([user_input])
 
     # -----------------------------
