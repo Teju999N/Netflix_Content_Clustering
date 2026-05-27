@@ -1,68 +1,152 @@
 import streamlit as st
 import pickle
 import pandas as pd
-from groq import Groq
 from sklearn.metrics.pairwise import cosine_similarity
 
-df = pd.read_csv("NETFLIX MOVIES AND TV SHOWS CLUSTERING.csv")
+# -----------------------------
+# Load data
+# -----------------------------
+df = pd.read_csv("NETFLIX MOVIES AND TV SHOWS CLUSTERING.csv")  # make sure this file is in repo
 
-# Load model
+# -----------------------------
+# Load models
+# -----------------------------
 model = pickle.load(open("kmeans.pkl", "rb"))
 tfidf = pickle.load(open("tfidf.pkl", "rb"))
 
+# -----------------------------
+# Precompute dataset vectors
+# -----------------------------
 X = tfidf.transform(df['description'].fillna(""))
 
+
+
+# -----------------------------
+# Streamlit UI
+# -----------------------------
 st.title("🎬 Netflix Content Clustering & Recommendation")
 
 user_input = st.text_input("Enter detailed movie/show description")
 
 if user_input:
-    # Handle weak input
-    if len(user_input.split()) < 3:
-        st.warning("Please enter a more detailed description")
 
-    # Transform input
-    vec = tfidf.transform([user_input])
+    # -----------------------------
+    # Handle weak input
+    # -----------------------------
+    if len(user_input.split()) < 3:
+        st.warning("Please enter a more detailed description")
 
-    # -----------------------------
-    # Cluster prediction
-    # -----------------------------
-    cluster = model.predict(vec)[0]
-    # cluster_label = cluster_names.get(int(cluster), "Unknown")
+    # -----------------------------
+    # Transform input
+    # -----------------------------
+    vec = tfidf.transform([user_input])
 
-    # -----------------------------
-    # Similarity (recommendation)
-    # -----------------------------
-    similarity = cosine_similarity(vec, X)
-    top_idx = similarity.argsort()[0][-5:][::-1]
+    # -----------------------------
+    # Cluster prediction
+    # -----------------------------
+    cluster = model.predict(vec)[0]
+    # cluster_label = cluster_names.get(int(cluster), "Unknown")
 
-    # ALSO SHOW GENRE (more reliable)
-    st.success(f"Genre: {df.iloc[top_idx[0]]['listed_in']}")
+    # -----------------------------
+    # Similarity (recommendation)
+    # -----------------------------
+    similarity = cosine_similarity(vec, X)
+    top_idx = similarity.argsort()[0][-5:][::-1]
 
-    st.subheader(":clapper: Similar Content:")
-    for i in top_idx:
-        st.write(df.iloc[i]['title'])
+    # ALSO SHOW GENRE (more reliable)
+    st.success(f"Genre: {df.iloc[top_idx[0]]['listed_in']}")
 
-    # -----------------------------
-    # Optional: GenAI Explanation (Groq)
-    # -----------------------------
-    try:
-        # from groq import Groq
-        client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+    st.subheader("🎬 Similar Content:")
+    for i in top_idx:
+        st.write(df.iloc[i]['title'])
 
-        response = client.chat.completions.create(
-            model="llama-3.1-8b-instant",  # updated working model
-            messages=[
-                {"role": "user", "content": f"Explain this Netflix content: {user_input}"}
-            ]
-        )
+    # -----------------------------
+    # Optional: GenAI Explanation (Groq)
+    # -----------------------------
+    try:
+        from groq import Groq
 
-        explanation = response.choices[0].message.content
-        st.subheader(":brain: Explanation:")
-        st.write(explanation)
+        client = Groq(api_key=st.secrets["GROQ_API_KEY"])
 
-    except Exception as e:
-        st.info("Explanation feature not available (check API key or model).")
+        response = client.chat.completions.create(
+            model="llama-3.1-8b-instant",  # updated working model
+            messages=[
+                {"role": "user", "content": f"Explain this Netflix content: {user_input}"}
+            ]
+        )
+
+        explanation = response.choices[0].message.content
+        st.subheader("🧠 Explanation:")
+        st.write(explanation)
+
+    except Exception as e:
+        st.info("Explanation feature not available (check API key or model).")
+
+# import streamlit as st
+# import pickle
+# import pandas as pd
+# from groq import Groq
+# from sklearn.metrics.pairwise import cosine_similarity
+
+# df = pd.read_csv("NETFLIX MOVIES AND TV SHOWS CLUSTERING.csv")
+
+# # Load model
+# model = pickle.load(open("kmeans.pkl", "rb"))
+# tfidf = pickle.load(open("tfidf.pkl", "rb"))
+
+# X = tfidf.transform(df['description'].fillna(""))
+
+# st.title("🎬 Netflix Content Clustering & Recommendation")
+
+# user_input = st.text_input("Enter detailed movie/show description")
+
+# if user_input:
+#     # Handle weak input
+#     if len(user_input.split()) < 3:
+#         st.warning("Please enter a more detailed description")
+
+#     # Transform input
+#     vec = tfidf.transform([user_input])
+
+#     # -----------------------------
+#     # Cluster prediction
+#     # -----------------------------
+#     cluster = model.predict(vec)[0]
+#     # cluster_label = cluster_names.get(int(cluster), "Unknown")
+
+#     # -----------------------------
+#     # Similarity (recommendation)
+#     # -----------------------------
+#     similarity = cosine_similarity(vec, X)
+#     top_idx = similarity.argsort()[0][-5:][::-1]
+
+#     # ALSO SHOW GENRE (more reliable)
+#     st.success(f"Genre: {df.iloc[top_idx[0]]['listed_in']}")
+
+#     st.subheader(":clapper: Similar Content:")
+#     for i in top_idx:
+#         st.write(df.iloc[i]['title'])
+
+#     # -----------------------------
+#     # Optional: GenAI Explanation (Groq)
+#     # -----------------------------
+#     try:
+#         # from groq import Groq
+#         client = Groq(api_key=st.secrets["GROQ_API_KEY"])
+
+#         response = client.chat.completions.create(
+#             model="llama-3.1-8b-instant",  # updated working model
+#             messages=[
+#                 {"role": "user", "content": f"Explain this Netflix content: {user_input}"}
+#             ]
+#         )
+
+#         explanation = response.choices[0].message.content
+#         st.subheader(":brain: Explanation:")
+#         st.write(explanation)
+
+#     except Exception as e:
+#         st.info("Explanation feature not available (check API key or model).")
 
     
 # client = Groq(api_key=st.secrets["GROQ_API_KEY"])
